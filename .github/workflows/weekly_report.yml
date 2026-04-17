@@ -1,0 +1,39 @@
+name: CFTC 每周持仓报告
+
+on:
+  schedule:
+    - cron: '0 6 * * 5'   # 每周五 14:00 北京时间
+  workflow_dispatch:        # 允许手动触发
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 生成报告
+        run: python3 cftc.py
+
+      - name: 保存报告到仓库
+        run: |
+          mkdir -p reports
+          mv cftc_持仓报告_*.html reports/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          git diff --cached --quiet || git commit -m "Weekly CFTC report $(date +%Y-%m-%d)"
+          git push
