@@ -30,14 +30,19 @@ jobs:
 
       - name: 保存报告到仓库
         run: |
+          set -e
           mkdir -p reports
           mv cftc_*.html reports/ 2>/dev/null || true
+          ls reports/
 
           python3 make_index.py
+
+          ls reports/index.html  # 验证文件已创建
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add reports/
           git status
+          git pull --rebase origin main
           git commit -m "Weekly CFTC report $(date +%Y-%m-%d)" || echo "Nothing new to commit"
           git push
