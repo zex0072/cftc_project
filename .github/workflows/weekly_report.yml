@@ -45,8 +45,8 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin clean-start
           git add reports/
           git status
-          git pull --rebase origin clean-start
           git commit -m "Weekly CFTC report $(date +%Y-%m-%d)" || echo "Nothing new to commit"
           git push origin clean-start
