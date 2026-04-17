@@ -32,6 +32,18 @@ jobs:
         run: |
           mkdir -p reports
           mv cftc_持仓报告_*.html reports/ 2>/dev/null || true
+
+          # 生成索引页，列出所有报告并自动跳转到最新一份
+          LATEST=$(ls reports/cftc_*.html 2>/dev/null | sort | tail -1 | xargs basename)
+          echo "<!DOCTYPE html><html><head><meta charset='UTF-8'>
+          <meta http-equiv='refresh' content='0; url=${LATEST}'>
+          <title>CFTC 持仓报告</title></head><body>
+          <h3>报告列表</h3><ul>" > reports/index.html
+          for f in $(ls reports/cftc_*.html 2>/dev/null | sort -r | xargs -n1 basename); do
+            echo "<li><a href='${f}'>${f}</a></li>" >> reports/index.html
+          done
+          echo "</ul></body></html>" >> reports/index.html
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add reports/
